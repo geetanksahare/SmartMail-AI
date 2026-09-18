@@ -6,9 +6,10 @@ from app.database.connection import engine
 
 
 SessionLocal = sessionmaker(
+    bind=engine,
     autocommit=False,
     autoflush=False,
-    bind=engine,
+    expire_on_commit=False,
 )
 
 
@@ -17,5 +18,10 @@ def get_db() -> Generator[Session, None, None]:
 
     try:
         yield db
+
+    except Exception:
+        db.rollback()
+        raise
+
     finally:
         db.close()
